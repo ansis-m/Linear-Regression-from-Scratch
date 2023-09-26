@@ -1,10 +1,10 @@
 import re
 
-from hstest import StageTest, CheckResult, dynamic_test, TestedProgram
+from hstest import StageTest, CheckResult, TestedProgram, dynamic_test
 
 
 def get_number(string):
-    return list(map(float, re.findall(r'-*\d*\.\d+|-*\d+', string)))
+    return list(map(float, re.findall(r'-*\d*\.\d+e-\d+|-*\d*\.\d+|-*\d+', string)))
 
 
 class LinearRegression(StageTest):
@@ -23,7 +23,7 @@ class LinearRegression(StageTest):
         if 'array' not in reply:
             return CheckResult.wrong("Return coefficient(s) in numpy array")
 
-        if reply.count(',') != 4 or reply.count(':') != 4 or reply.count('}') != reply.count('{'):
+        if reply.count(',') != 5 or reply.count(':') != 4 or reply.count('}') != reply.count('{'):
             return CheckResult.wrong('The dictionary output is not properly constructed.')
 
         output = reply.replace("{", "").replace("}", "").lower().split(", '")
@@ -59,30 +59,37 @@ class LinearRegression(StageTest):
         if len(intercept) != 1:
             return CheckResult.wrong(f"Intercept should contain a single value, found {len(intercept)}")
         intercept = intercept[0]
-        if not 18.6 < intercept < 18.8:
-            return CheckResult.wrong("Wrong value for Intercept")
+        if not abs(intercept) < 10 ** (-10):
+            return CheckResult.wrong(
+                "Wrong value for difference between Intercepts of sklearn LinearRegression and CustomLinearRegression")
 
         coefficient = get_number(coefficient)
-        if len(coefficient) != 2:
-            return CheckResult.wrong(f"Coefficient should contain two values, found {len(coefficient)}")
-        if not -3.3 < coefficient[0] < -3.1:
-            return CheckResult.wrong("Wrong value for beta1")
-        if not 0.5 < coefficient[1] < 0.7:
-            return CheckResult.wrong("Wrong value for beta2")
+        if len(coefficient) != 3:
+            return CheckResult.wrong(f"Coefficient should contain three values, found {len(coefficient)}")
+        if not abs(coefficient[0]) < 10 ** (-10):
+            return CheckResult.wrong(
+                "Wrong value for difference between beta1 of sklearn LinearRegression and beta1 of CustomLinearRegression")
+        if not abs(coefficient[1]) < 10 ** (-10):
+            return CheckResult.wrong(
+                "Wrong value for difference between beta2 of sklearn LinearRegression and beta2 of CustomLinearRegression")
+        if not abs(coefficient[2]) < 10 ** (-10):
+            return CheckResult.wrong(
+                "Wrong value for difference between beta3 of sklearn LinearRegression and beta3 of CustomLinearRegression")
 
         r2 = get_number(r2)
         if len(r2) != 1:
             return CheckResult.wrong(f"R2 should contain a single value, found {len(r2)}")
         r2 = r2[0]
-        if not 0.7 < r2 < 0.9:
-            return CheckResult.wrong("Wrong value for R2 score")
+        if not abs(r2) < 10 ** (-10):
+            return CheckResult.wrong("Wrong value for difference between sklearn R2 and custom R2")
 
         rmse = get_number(rmse)
         if len(rmse) != 1:
             return CheckResult.wrong(f"RMSE should contain a single value, found {len(rmse)}")
         rmse = rmse[0]
-        if not 1.6 < rmse < 1.8:
-            return CheckResult.wrong("Wrong value for RMSE score. Did you take the square root of mean squared error?")
+        if not abs(rmse) < 10 ** (-10):
+            return CheckResult.wrong("Wrong value for difference between sklearn RMSE and custom RMSE.\n"
+                                     "Did you take the square root of mean squared error?")
 
         return CheckResult.correct()
 
