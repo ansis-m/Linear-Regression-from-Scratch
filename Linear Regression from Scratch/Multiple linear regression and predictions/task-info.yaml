@@ -62,5 +62,8 @@ files:
     if __name__ == '__main__':    LinearRegression().run_tests()
   learner_created: false
 feedback_link: https://hyperskill.org/projects/195/stages/972/implement#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Congratulations!
+  time: "Tue, 26 Sep 2023 07:33:11 UTC"
 record: -1

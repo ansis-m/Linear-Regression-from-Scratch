@@ -1,8 +1,10 @@
 
 import numpy as np
 
-x = np.array([4.0, 4.5, 5, 5.5, 6.0, 6.5, 7.0])
-y = np.array([33, 42, 45, 51, 53, 61, 62])
+x = [4, 4.5, 5, 5.5, 6, 6.5, 7]
+w = [1, -3, 2, 5, 0, 3, 6]
+z = [11, 15, 12, 9, 18, 13, 16]
+y = [33, 42, 45, 51, 53, 61, 62]
 
 
 class CustomLinearRegression:
@@ -11,23 +13,17 @@ class CustomLinearRegression:
 
         self.fit_intercept = fit_intercept
         self.coefficients = ...
-        self.coefficient = ...
-        self.intercept = ...
-        self.map = {}
+        self.y_pred = ...
 
-    def fit(self, X=x, Y=y):
+    def fit(self):
 
-        if self.fit_intercept:
-            X = np.vstack([x, np.ones(len(x))]).T
-        else:
-            X = X.T
-        self.coefficients, _, _, _ = np.linalg.lstsq(X, Y, rcond=None)
-        self.coefficient, self.intercept = self.coefficients
-        self.map = {'Intercept': self.intercept, 'Coefficient': self.coefficients[:-1]}
+        data = np.column_stack([x, w, z])
+        self.coefficients, _, _, _ = np.linalg.lstsq(data, y, rcond=None)
+        self.y_pred = np.dot(data, self.coefficients)
         return self
 
     def print(self):
-        print(self.map)
+        print(self.y_pred)
 
 
 def main():

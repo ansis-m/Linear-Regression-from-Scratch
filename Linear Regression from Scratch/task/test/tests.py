@@ -1,5 +1,6 @@
 import re
 
+import numpy as np
 from hstest import StageTest, CheckResult, dynamic_test, TestedProgram
 
 
@@ -7,64 +8,33 @@ def get_number(string):
     return list(map(float, re.findall(r'-*\d*\.\d+|-*\d+', string)))
 
 
+answer = np.array([35.35993478, 41.13594995, 45.19749381, 51.16062856, 52.99980512, 60.91799349, 61.01596736])
+
+
 class LinearRegression(StageTest):
 
     @dynamic_test()
     def test_1(self):
-        try:
-            import numpy
-            import sklearn
-        except ModuleNotFoundError as err:
-            return CheckResult.wrong(str(err))
-        return CheckResult.correct()
-
-    @dynamic_test()
-    def test_2(self):
         t = TestedProgram()
-        reply = t.start().strip().split("\n")
+        reply = t.start()
 
         if len(reply) == 0:
             return CheckResult.wrong("No output was printed. Print output in the right format.")
 
-        if len(reply) != 1:
-            return CheckResult.wrong("Wrong output format. Check the Example section.")
+        if '[' not in reply or ']' not in reply or ',' in reply:
+            return CheckResult.wrong("Print output as numpy array")
 
-        reply = reply[0]
+        reply = get_number(reply)
 
-        if 'array' not in reply:
-            return CheckResult.wrong("Return coefficient(s) in numpy array")
+        if len(reply) != 7:
+            return CheckResult.wrong(f"y should contain 7 values, found {len(reply)}")
 
-        if reply.count(',') != 1 or reply.count(':') != 2 or reply.count('}') != reply.count('{'):
-            return CheckResult.wrong('The dictionary output is not properly constructed.')
-
-        output = reply.replace("{", "").replace("}", "").replace("'", '').lower().split(",")
-
-        if len(output) != 2:
-            return CheckResult.wrong(f"Number of items in dictionary should be 2, {len(output)} present")
-
-        output1, output2 = output
-        name1, answer1 = output1.strip().split(':')
-        name2, answer2 = output2.strip().split(':')
-        answers = {name1.strip(): answer1.strip(), name2.strip(): answer2.strip()}
-        intercept = answers.get('intercept', '0000000')
-        coefficient = answers.get('coefficient', '0000000')
-        coefficient = re.sub('array', '', coefficient)
-
-        if intercept == '0000000' or coefficient == '0000000' or len(intercept) == 0 or len(coefficient) == 0:
-            return CheckResult.wrong("Print values for both Intercept and Coefficient")
-
-        intercept = get_number(intercept)
-        if len(intercept) != 1:
-            return CheckResult.wrong(f"Intercept should contain a single value, found {len(intercept)}")
-        intercept = intercept[0]
-        if not -2.8 < intercept < -2.6:
-            return CheckResult.wrong("Wrong value for Intercept")
-
-        coefficient = get_number(coefficient)
-        if len(coefficient) != 1:
-            return CheckResult.wrong(f"Coefficient should contain a single value, found {len(coefficient)}")
-        if not 9.45 < coefficient[0] < 9.55:
-            return CheckResult.wrong("Wrong value for beta1")
+        for reply_coef, answer_coef in zip(reply, answer):
+            # 2% error is allowed
+            error = answer_coef * 0.02
+            if not answer_coef - error < reply_coef < answer_coef + error:
+                return CheckResult.wrong(
+                    f"Incorrect y array. Check your fit_intercept=False and predict method implementations")
 
         return CheckResult.correct()
 
