@@ -116,6 +116,6 @@ files:
 
     if __name__ == '__main__':    LinearRegression().run_tests()
   learner_created: false
-feedback_link: https://hyperskill.org/projects/195/stages/974/implement#comment
+feedback_link: https://hyperskill.org/learn/step/14068#comment
 status: Unchecked
 record: -1
